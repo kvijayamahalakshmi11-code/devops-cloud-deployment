@@ -1,13 +1,15 @@
 name: Advanced DevOps CI/CD
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
-
 jobs:
   test:
     runs-on: ubuntu-latest
