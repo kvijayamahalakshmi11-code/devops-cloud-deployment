@@ -1,55 +1,53 @@
-
 name: CI/CD Pipeline
 
-"on":
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on:
+push:
+branches:
+- main
+pull_request:
+branches:
+- main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+test:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pytest
+  - name: Install dependencies
+    run: |
+      pip install -r requirements.txt
+      pip install pytest
 
-      - name: Run tests
-        run: pytest
+  - name: Run tests
+    run: pytest
 
-  docker-build:
-    needs: test
-    runs-on: ubuntu-latest
+docker-build:
+needs: test
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t devops-cloud-app .
+  - name: Build Docker image
+    run: docker build -t devops-cloud-app .
 
-  deploy:
-    needs: docker-build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+deploy:
+needs: docker-build
+if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Trigger Render deployment
-        run: |
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys"
-
+steps:
+  - name: Trigger Render deployment
+    run: |
+      curl -X POST \
+        -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+        "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys"
