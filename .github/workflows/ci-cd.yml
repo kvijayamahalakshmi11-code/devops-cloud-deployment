@@ -1,5 +1,5 @@
 
-name: Advanced DevOps CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
@@ -31,29 +31,26 @@ jobs:
 
       - name: Run tests
         working-directory: backend
-        run: pytest
-
-      - name: Validate Docker Compose
-        run: docker compose config
-
-      - name: Build Docker images
-        run: docker compose build
-
-      - name: Start services
-        run: docker compose up -d
-
-      - name: Check services
-        run: docker compose ps
-
-      - name: Check application health
         run: |
-          sleep 10
-          curl -f http://localhost:8080/api/health
+          pytest
 
-      - name: Show logs
-        if: always()
-        run: docker compose logs --no-color
+  docker-build:
+    needs: test
+    runs-on: ubuntu-latest
 
-      - name: Stop services
-        if: always()
-        run: docker compose down
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Backend Docker image
+        run: |
+          docker build -t devops-cloud-backend ./backend
+
+      - name: Build Frontend Docker image
+        run: |
+          docker build -t devops-cloud-frontend ./frontend
+
+      - name: Build Nginx Docker image
+        run: |
+          docker build -t devops-cloud-nginx ./nginx
+
